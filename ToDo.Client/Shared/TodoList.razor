@@ -1,0 +1,43 @@
+﻿@inject HttpClient Http
+
+@if (todoEntries == null)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else if(todoEntries.Count == 0)
+{
+    <p>Нет новых задач</p>
+}
+else
+{
+    var priority = string.Empty;
+    <div class="list-group">
+        @foreach (var todoEntry in todoEntries)
+        {
+            if (todoEntry.Executor != string.Empty) { priority = "list-group-item-primary"; }
+            else priority = "";
+
+            <a href="/current/@todoEntry.Id" class="list-group-item list-group-item-action @priority">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@todoEntry.Title</h5>
+                    <small>@todoEntry.Issued</small>
+                </div>
+                <p class="mb-1">@todoEntry.Content</p>
+                <div class="d-flex w-100 justify-content-between">
+                    <small>@todoEntry.Executor</small>
+                    <small>@todoEntry.Author</small>
+                </div>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    private List<TodoEntryDto> todoEntries;
+    protected override async Task OnInitializedAsync()
+    {
+        todoEntries = await Http.GetFromJsonAsync<List<TodoEntryDto>>("https://localhost:7158/api/ShowTodo");
+    }
+}

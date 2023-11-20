@@ -1,0 +1,74 @@
+﻿@page "/newtodo"
+@inject HttpClient Http
+<PageTitle>Добавить новую задау по кафедре ИСАУ</PageTitle>
+<h2>Добавить новую задау</h2>
+<hr />
+
+<div class="mb-3">
+    <label for="Title" class="form-label">Название задачи</label>
+    <input type="text" class="form-control" @bind="Title" id="Title" placeholder="Введите название">
+</div>
+<div class="mb-3">
+    <label for="Content" class="form-label">Текст задачи</label>
+    <textarea class="form-control" @bind="Content" id="Content" rows="3" placeholder="Введите задачу"></textarea>
+</div>
+<div class="mb-3">
+    <label for="Executor" class="form-label">Истолнитель</label>
+    <select class="form-select" @bind="ExecutorId" id="Executor">
+        <option selected value="@Guid.Empty">Всем</option>
+        @foreach (var executor in ExecutorsList)
+        {
+            <option value="@executor.Id">@executor.Name, @executor.Post</option>
+        }
+    </select>
+</div>
+<div class="mb-3">
+    <label for="RunUntill" class="form-label">Выполнить до</label>
+    <input type="date" class="form-control" @bind="RunUntill" id="RunUntill">
+</div>
+<div class="mb-3">
+    <label for="Priority" class="form-label">Приоритет</label>
+    <select class="form-select" @bind="PriorityName" id="Priority">
+        <option value="" selected>Выберите приоритет</option>
+        <option value="@Priority.Low">Низкий</option>
+        <option value="@AddPriority.Medium">Средний</option>
+        <option value="@AddPriority.High">Высокий</option>
+        <option value="@AddPriority.Critical">Критичный</option>
+    </select>
+</div>
+<button type="submit" class="btn btn-primary" @onclick="(async () => await AddNewTodo())">Создать</button>
+
+@code {
+    private string Title = string.Empty;
+    private string Content = string.Empty;
+    private string PriorityName = string.Empty;
+    private Guid ExecutorId;
+    private DateTime RunUntill = DateTime.Now;
+
+    private List<EmployeeDto> ExecutorsList = new();
+
+    //Низкий, Средний, Высокий, Критичный
+    private enum AddPriority { Low, Medium, High, Critical }
+
+    private async Task AddNewTodo()
+    {
+        AddTodoDto todoEntryDto = new();
+
+        todoEntryDto.Title = Title;
+        todoEntryDto.Content = Content;
+        todoEntryDto.Author = "Александр Шабанов";
+        todoEntryDto.ExecutorId = ExecutorId;
+        if (PriorityName != string.Empty)
+            todoEntryDto.Priority = 0;
+        else
+            todoEntryDto.Priority = 0;
+        todoEntryDto.RunUntill = RunUntill;
+        
+        await Http.PostAsJsonAsync("https://localhost:7158/api/CorrectionTodo", todoEntryDto);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ExecutorsList = await Http.GetFromJsonAsync<List<EmployeeDto>>("https://localhost:7158/api/Emploeyers");
+    }
+}

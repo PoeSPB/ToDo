@@ -1,0 +1,27 @@
+﻿@page "/current/{id:guid}"
+@inject HttpClient Http
+@if (todoEntry != null)
+{
+    <PageTitle>Задача "@todoEntry.Title" по кафедре ИСАУ</PageTitle>
+    <h2>Задача "@todoEntry.Title"</h2>
+    <hr />
+
+    <p>@todoEntry.Content</p>
+    <p>Задача создана: @todoEntry.Issued</p>
+    <p>Исполнитель: @todoEntry.Executor</p>
+    <p>Автор: @todoEntry.Author</p>
+
+}
+
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+
+    private TodoEntryDto? todoEntry;
+    protected override async Task OnInitializedAsync()
+    {
+        todoEntry = await Http.GetFromJsonAsync<TodoEntryDto>(
+            new Uri($"https://localhost:7158/api/ShowTodo/{id.ToString()}")
+        );
+    }
+}
